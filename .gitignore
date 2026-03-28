@@ -1,0 +1,14 @@
+# Python Environment
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Jarvis Temporary Files
+temp_command.wav

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis | Local Command Center</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: rgba(20, 20, 25, 0.85);
+            --jarvis-cyan: #00f3ff;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+        }
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, #112233 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .dashboard {
+            width: 90%;
+            max-width: 1000px;
+            height: 85vh;
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background-color: var(--jarvis-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--jarvis-cyan);
+            transition: all 0.3s ease;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+        .chat-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.2); border-radius: 3px; }
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            align-self: flex-end;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-right-radius: 2px;
+        }
+        .message.jarvis {
+            align-self: flex-start;
+            background-color: rgba(0, 243, 255, 0.05);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-bottom-left-radius: 2px;
+            color: var(--jarvis-cyan);
+        }
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 15px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: var(--jarvis-cyan);
+        }
+        button {
+            background: transparent;
+            border: 1px solid var(--jarvis-cyan);
+            color: var(--jarvis-cyan);
+            padding: 0 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: var(--jarvis-cyan);
+            color: black;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+        .btn-stop {
+            border-color: #ff4444;
+            color: #ff4444;
+            padding: 8px 15px;
+            font-size: 0.8rem;
+        }
+        .btn-stop:hover {
+            background: #ff4444;
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+        }
+        .typing-indicator {
+            align-self: flex-start;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.85rem;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <div class="header-left">
+                <div class="status-dot" id="status-dot"></div>
+                <h1>Jarvis Core Terminal</h1>
+            </div>
+            <button class="btn-stop" onclick="stopJarvis()">Interrupt Voice</button>
+        </div>
+
+        <div class="chat-container" id="chat-container">
+            <div class="message jarvis">System initialized. Awaiting voice or text input.</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type command sequence..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Transmit</button>
+        </div>
+    </div>
+
+    <script>
+        // Interrupt API Call
+        async function stopJarvis() {
+            await fetch('/api/stop', { method: 'POST' });
+        }
+
+        // Poll the backend every 800ms to sync the UI state and Voice Logs
+        setInterval(async () => {
+            try {
+                const response = await fetch("/api/status");
+                const data = await response.json();
+                
+                // 1. Dynamic Status Dot Colors
+                const dot = document.getElementById('status-dot');
+                if (data.state === 'idle') {
+                    dot.style.backgroundColor = 'var(--jarvis-cyan)';
+                    dot.style.boxShadow = '0 0 10px var(--jarvis-cyan)';
+                } else if (data.state === 'listening') {
+                    dot.style.backgroundColor = '#ff4444'; // Red
+                    dot.style.boxShadow = '0 0 15px #ff4444';
+                } else if (data.state === 'processing') {
+                    dot.style.backgroundColor = '#ffbb33'; // Yellow
+                    dot.style.boxShadow = '0 0 15px #ffbb33';
+                } else if (data.state === 'speaking') {
+                    dot.style.backgroundColor = '#00C851'; // Green
+                    dot.style.boxShadow = '0 0 15px #00C851';
+                }
+
+                // 2. Inject Voice Transcripts into the Chat Window
+                if (data.logs && data.logs.length > 0) {
+                    const chatContainer = document.getElementById("chat-container");
+                    
+                    data.logs.forEach(log => {
+                        // User Voice Command
+                        const userMsgDiv = document.createElement("div");
+                        userMsgDiv.className = "message user";
+                        userMsgDiv.textContent = `🎤 ${log.user}`;
+                        chatContainer.appendChild(userMsgDiv);
+
+                        // Jarvis Voice Response
+                        const jarvisMsgDiv = document.createElement("div");
+                        jarvisMsgDiv.className = "message jarvis";
+                        jarvisMsgDiv.textContent = log.jarvis;
+                        chatContainer.appendChild(jarvisMsgDiv);
+                    });
+                    
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            } catch (error) {
+                document.getElementById('status-dot').style.backgroundColor = '#555';
+            }
+        }, 800);
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const message = inputField.value.trim();
+            if (!message) return;
+            
+            const chatContainer = document.getElementById("chat-container");
+            
+            const userMsgDiv = document.createElement("div");
+            userMsgDiv.className = "message user";
+            userMsgDiv.textContent = `⌨️ ${message}`;
+            chatContainer.appendChild(userMsgDiv);
+            
+            inputField.value = "";
+
+            const typingDiv = document.createElement("div");
+            typingDiv.className = "typing-indicator";
+            typingDiv.id = "loading";
+            typingDiv.textContent = "Processing logic...";
+            chatContainer.appendChild(typingDiv);
+            
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                
+                document.getElementById("loading").remove();
+                
+                const jarvisMsgDiv = document.createElement("div");
+                jarvisMsgDiv.className = "message jarvis";
+                jarvisMsgDiv.textContent = data.reply;
+                chatContainer.appendChild(jarvisMsgDiv);
+
+            } catch (error) {
+                document.getElementById("loading").remove();
+                const errorMsgDiv = document.createElement("div");
+                errorMsgDiv.className = "message jarvis";
+                errorMsgDiv.style.color = "#ff4444";
+                errorMsgDiv.textContent = "Error: Connection to AI Core failed.";
+                chatContainer.appendChild(errorMsgDiv);
+            }
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
