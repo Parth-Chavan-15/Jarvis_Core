@@ -1,14 +1,13 @@
-# Python Environment
+# Environments
 venv/
 env/
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
 
-# OS Files
+# PyInstaller Build Folders
+build/
+dist/
+*.spec
+
+# OS generated files
 .DS_Store
 Thumbs.db
-
-# Jarvis Temporary Files
-temp_command.wav

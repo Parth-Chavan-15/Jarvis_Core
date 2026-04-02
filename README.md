@@ -20,11 +20,14 @@ Open your terminal in the cloned folder and run these commands to isolate the de
 ```bash
 python -m venv venv
 venv\Scripts\activate
+```
 
 ### 3. Install the AI Libraries
 ```bash
 pip install -r requirements.txt
+```
 
 ### 4. Boot Up Jarvis
 ```bash
 python main.py
+```

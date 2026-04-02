@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis | Local Command Center</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
     <style>
         :root {
             --bg-color: #050505;
@@ -24,10 +30,50 @@
             align-items: center;
             overflow: hidden;
         }
-        .dashboard {
-            width: 90%;
-            max-width: 1000px;
+        
+        .main-container {
+            width: 95%;
+            max-width: 1400px;
             height: 85vh;
+            display: flex;
+            gap: 20px;
+        }
+
+        .vision-panel {
+            flex: 1;
+            background: #000;
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .vision-header {
+            padding: 15px;
+            background: rgba(0,0,0,0.8);
+            position: absolute;
+            top: 0; width: 100%;
+            z-index: 10;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            color: var(--jarvis-cyan);
+            text-transform: uppercase;
+        }
+
+        .input_video { display: none; } 
+        .output_canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); 
+        }
+
+        .terminal-panel {
+            flex: 1;
             background: var(--panel-bg);
             border: 1px solid rgba(0, 243, 255, 0.15);
             border-radius: 12px;
@@ -153,74 +199,121 @@
             font-size: 0.85rem;
             padding-left: 10px;
         }
+        /* NEW: Siri/Google Assistant Pulsing Orb Effect */
+        @keyframes listenPulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
+            50% { transform: scale(1.6); box-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055, 0 0 60px #ff0055; }
+            100% { transform: scale(1); box-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
+        }
+        .status-dot.listening-mode {
+            background-color: #ff0055 !important;
+            animation: listenPulse 1.2s infinite ease-in-out !important;
+        }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="header">
-            <div class="header-left">
-                <div class="status-dot" id="status-dot"></div>
-                <h1>Jarvis Core Terminal</h1>
+    <div class="main-container">
+        
+        <div class="vision-panel">
+            <div class="vision-header">Optic Sensor: Active</div>
+            <video class="input_video"></video>
+            <canvas class="output_canvas" width="640" height="480"></canvas>
+        </div>
+
+        <div class="terminal-panel">
+            <div class="header">
+                <div class="header-left">
+                    <div class="status-dot" id="status-dot"></div>
+                    <h1>Jarvis Core Terminal</h1>
+                </div>
+                <button class="btn-stop" onclick="stopJarvis()">⏹ Stop Jarvis</button>
             </div>
-            <button class="btn-stop" onclick="stopJarvis()">Interrupt Voice</button>
+
+            <div class="chat-container" id="chat-container">
+                <div class="message jarvis">System initialized. Awaiting voice, text, or visual input.</div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type command sequence..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Transmit</button>
+            </div>
         </div>
 
-        <div class="chat-container" id="chat-container">
-            <div class="message jarvis">System initialized. Awaiting voice or text input.</div>
-        </div>
-
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type command sequence..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Transmit</button>
-        </div>
     </div>
 
     <script>
-        // Interrupt API Call
+        // ==========================================
+        // 1. YOUR EXISTING TERMINAL LOGIC
+        // ==========================================
         async function stopJarvis() {
             await fetch('/api/stop', { method: 'POST' });
         }
 
-        // Poll the backend every 800ms to sync the UI state and Voice Logs
         setInterval(async () => {
             try {
                 const response = await fetch("/api/status");
                 const data = await response.json();
                 
-                // 1. Dynamic Status Dot Colors
+                // DOT UI UPDATE
                 const dot = document.getElementById('status-dot');
+                dot.className = 'status-dot'; // Reset class
+                
                 if (data.state === 'idle') {
                     dot.style.backgroundColor = 'var(--jarvis-cyan)';
                     dot.style.boxShadow = '0 0 10px var(--jarvis-cyan)';
+                    dot.style.transform = 'scale(1)';
                 } else if (data.state === 'listening') {
-                    dot.style.backgroundColor = '#ff4444'; // Red
-                    dot.style.boxShadow = '0 0 15px #ff4444';
+                    // THE FIX: Apply the pulsating orb class
+                    dot.classList.add('listening-mode');
                 } else if (data.state === 'processing') {
-                    dot.style.backgroundColor = '#ffbb33'; // Yellow
+                    dot.style.backgroundColor = '#ffbb33'; 
                     dot.style.boxShadow = '0 0 15px #ffbb33';
+                    dot.style.transform = 'scale(1)';
                 } else if (data.state === 'speaking') {
-                    dot.style.backgroundColor = '#00C851'; // Green
+                    dot.style.backgroundColor = '#00C851'; 
                     dot.style.boxShadow = '0 0 15px #00C851';
+                    dot.style.transform = 'scale(1)';
                 }
 
-                // 2. Inject Voice Transcripts into the Chat Window
+                // NEW FEATURE: IF PYTHON ASKS FOR A PICTURE, SNAP IT AND SEND IT BACK!
+                // NEW FEATURE: IF PYTHON ASKS FOR A PICTURE, SNAP IT AND SEND IT BACK!
+                if (data.vision_prompt) {
+                    
+                    // THE FIX: Check if the camera heartbeat has flatlined (older than 2 seconds)
+                    const isCameraFrozen = (Date.now() - lastCameraUpdate) > 2000;
+
+                    if (document.hidden || isCameraFrozen) {
+                        console.warn("Sensor is frozen or browser is backgrounded. Cancelling.");
+                        fetch("/api/vision_failed", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ error: "camera_frozen" })
+                        });
+                    } else {
+                        console.log("Python requested a frame! Snapping picture...");
+                        const image_b64 = canvasElement.toDataURL('image/jpeg', 0.8);
+                        
+                        fetch("/api/vision", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ prompt: data.vision_prompt, image_b64: image_b64 })
+                        });
+                    }
+                }
+
                 if (data.logs && data.logs.length > 0) {
                     const chatContainer = document.getElementById("chat-container");
-                    
                     data.logs.forEach(log => {
-                        // User Voice Command
                         const userMsgDiv = document.createElement("div");
                         userMsgDiv.className = "message user";
                         userMsgDiv.textContent = `🎤 ${log.user}`;
                         chatContainer.appendChild(userMsgDiv);
 
-                        // Jarvis Voice Response
                         const jarvisMsgDiv = document.createElement("div");
                         jarvisMsgDiv.className = "message jarvis";
                         jarvisMsgDiv.textContent = log.jarvis;
                         chatContainer.appendChild(jarvisMsgDiv);
                     });
-                    
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
             } catch (error) {
@@ -229,31 +322,31 @@
         }, 800);
 
         function handleKeyPress(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-            }
+            if (event.key === "Enter") { sendMessage(); }
         }
 
-        async function sendMessage() {
+        async function sendMessage(textOverride = null, isGesture = false) {
             const inputField = document.getElementById("user-input");
-            const message = inputField.value.trim();
+            const message = textOverride || inputField.value.trim();
             if (!message) return;
             
             const chatContainer = document.getElementById("chat-container");
-            
             const userMsgDiv = document.createElement("div");
             userMsgDiv.className = "message user";
-            userMsgDiv.textContent = `⌨️ ${message}`;
+            
+            if (isGesture) {
+                userMsgDiv.innerHTML = `🖐️ <i>Gesture: ${message}</i>`;
+            } else {
+                userMsgDiv.textContent = `⌨️ ${message}`;
+                inputField.value = "";
+            }
             chatContainer.appendChild(userMsgDiv);
             
-            inputField.value = "";
-
             const typingDiv = document.createElement("div");
             typingDiv.className = "typing-indicator";
             typingDiv.id = "loading";
             typingDiv.textContent = "Processing logic...";
             chatContainer.appendChild(typingDiv);
-            
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             try {
@@ -264,14 +357,12 @@
                 });
 
                 const data = await response.json();
-                
                 document.getElementById("loading").remove();
                 
                 const jarvisMsgDiv = document.createElement("div");
                 jarvisMsgDiv.className = "message jarvis";
                 jarvisMsgDiv.textContent = data.reply;
                 chatContainer.appendChild(jarvisMsgDiv);
-
             } catch (error) {
                 document.getElementById("loading").remove();
                 const errorMsgDiv = document.createElement("div");
@@ -280,9 +371,98 @@
                 errorMsgDiv.textContent = "Error: Connection to AI Core failed.";
                 chatContainer.appendChild(errorMsgDiv);
             }
-
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+
+
+        // ==========================================
+        // 2. THE NEW VISION & GESTURE SYSTEM
+        // ==========================================
+        const videoElement = document.getElementsByClassName('input_video')[0];
+        const canvasElement = document.getElementsByClassName('output_canvas')[0];
+        const canvasCtx = canvasElement.getContext('2d');
+
+        let lastGestureTime = 0;
+        let lastCameraUpdate = 0; // THE FIX: Tracks the exact millisecond the camera last worked
+
+        function checkGestures(landmarks) {
+            // THE UPGRADE: True 3D Spatial Distance Formula (x, y, and z axes)
+            const getDist3D = (p1, p2) => Math.sqrt(
+                Math.pow(p1.x - p2.x, 2) + 
+                Math.pow(p1.y - p2.y, 2) + 
+                Math.pow(p1.z - p2.z, 2)
+            );
+
+            // Calculate finger states using 3D depth
+            const indexUp = getDist3D(landmarks[0], landmarks[8]) > 1.5 * getDist3D(landmarks[0], landmarks[5]);
+            const middleUp = getDist3D(landmarks[0], landmarks[12]) > 1.5 * getDist3D(landmarks[0], landmarks[9]);
+            const ringUp = getDist3D(landmarks[0], landmarks[16]) > 1.5 * getDist3D(landmarks[0], landmarks[13]);
+            const pinkyUp = getDist3D(landmarks[0], landmarks[20]) > 1.5 * getDist3D(landmarks[0], landmarks[17]);
+            
+            const thumbOut = getDist3D(landmarks[4], landmarks[17]) > 1.2 * getDist3D(landmarks[2], landmarks[17]);
+
+            let detectedCommand = null;
+
+            // STRICT LOGIC MATRIX: It now explicitly checks every single finger for every gesture
+            if (indexUp && middleUp && ringUp && pinkyUp && thumbOut) {
+                // ALL 5 FINGERS: True Open Palm
+                detectedCommand = "open notepad";
+            } 
+            else if (indexUp && middleUp && !ringUp && !pinkyUp && !thumbOut) {
+                // ONLY INDEX & MIDDLE: Strict Peace Sign (Thumb and others must be tucked)
+                detectedCommand = "open chrome";
+            }
+            else if (!indexUp && !middleUp && !ringUp && !pinkyUp && thumbOut) {
+                // ONLY THUMB: Strict Thumbs Up
+                detectedCommand = "open spotify";
+            }
+
+            if (detectedCommand) {
+                const now = Date.now();
+                if (now - lastGestureTime > 5000) { 
+                    lastGestureTime = now;
+                    sendMessage(detectedCommand, true); 
+                }
+            }
+        }
+
+        function onResults(results) {
+            // THE FIX: The camera is alive! Update the heartbeat timestamp.
+            lastCameraUpdate = Date.now();
+
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+            
+            if (results.multiHandLandmarks) {
+                for (const landmarks of results.multiHandLandmarks) {
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00f3ff', lineWidth: 2});
+                    drawLandmarks(canvasCtx, landmarks, {color: '#ffffff', lineWidth: 1});
+                    checkGestures(landmarks);
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+        hands.setOptions({
+            maxNumHands: 1, 
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+        hands.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
     </script>
 </body>
 </html>
