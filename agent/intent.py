@@ -59,7 +59,7 @@ async def extract_and_route(user_message: str) -> str:
     # 4. LET LLAMA 3 DECIDE EVERYTHING ELSE
     client = AsyncClient()
     system_prompt = """You are an intent extraction engine. Extract the user's intent and output ONLY valid JSON.
-    Possible intents: "create_folder", "delete_item", "rename_item", "get_time", "none".
+    Possible intents: "create_folder", "delete_item", "rename_item", "none".
     If create_folder: extract "folder_name" and "target_directory" (default to "desktop").
     If delete_item: extract "item_name" and "target_directory" (default to "desktop").
     If rename_item: extract "old_name", "new_name", and "target_directory" (default to "desktop").
@@ -98,9 +98,6 @@ async def extract_and_route(user_message: str) -> str:
             target_dir = params.get("target_directory", "desktop")
             state.pending_action = {"action": "rename_item", "old_name": old_name, "new_name": new_name, "target_directory": target_dir}
             return f"Sir, I am preparing to rename '{old_name}' to '{new_name}' in your {target_dir}. Confirm?"
-
-        elif intent == "get_time":
-            return tools.get_time()
 
         else:
             return await ask_jarvis(user_message)

@@ -48,7 +48,7 @@ def shutdown_jarvis():
     speak_text("Shutting down core systems. Goodbye.")
     
     # THE FIX: Increased sleep from 1s to 4s to let the voice finish speaking!
-    time.sleep(4) 
+    time.sleep(4.5) 
     
     if overlay_process is not None:
         overlay_process.terminate()
@@ -143,6 +143,12 @@ def jarvis_audio_loop():
             is_awake = wait_for_wake_word()
 
         if is_awake:
+            # THE FIX: Kill the voice engine and clear the queue the moment he wakes up!
+            state.stop_voice = True 
+            import agent.voice as voice
+            with voice.audio_queue.mutex:
+                voice.audio_queue.queue.clear()
+                
             command = record_and_transcribe()
             if command:
                 clean_cmd = command.lower()
@@ -150,25 +156,25 @@ def jarvis_audio_loop():
                     shutdown_jarvis()
                 
                 state.interrupt_llm = False 
-                state.current_state = "processing" # THE FIX: Yellow while intent logic runs
+                state.current_state = "processing" # Yellow while intent logic runs
                 reply = asyncio.run(process_interaction(command))
                 
                 if not state.interrupt_llm:
                     state.voice_logs.append({"user": command, "jarvis": reply})
-                    state.current_state = "speaking" # THE FIX: Green while speaking
+                    state.current_state = "speaking" # Green while speaking
                     speak_text(reply)
                     
-                    # THE FIX: Revert to the correct state, not blindly to cyan
+                    # Revert to the correct state, not blindly to cyan
                     is_running = check_ollama()
                     state.current_state = "idle" if is_running else "ollama_error"
-            else:
-                if state.pending_action is not None:
-                    state.pending_action = None
-                    state.current_state = "speaking"
-                    speak_text("Task aborted due to silence. Returning to standby.")
-                    
-                    is_running = check_ollama()
-                    state.current_state = "idle" if is_running else "ollama_error"
+        else:
+            if state.pending_action is not None:
+                state.pending_action = None
+                state.current_state = "speaking"
+                speak_text("Task aborted due to silence. Returning to standby.")
+                
+                is_running = check_ollama()
+                state.current_state = "idle" if is_running else "ollama_error"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

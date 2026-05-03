@@ -137,13 +137,17 @@ class SiriHUD(QMainWindow):
     def __init__(self):
         super().__init__()
         
+        # THE FIX: Add ToolTip and WindowDoesNotAcceptFocus to force absolute top-level
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.Tool |
-            Qt.WindowType.WindowTransparentForInput
+            Qt.WindowType.ToolTip | 
+            Qt.WindowType.WindowTransparentForInput |
+            Qt.WindowType.WindowDoesNotAcceptFocus
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating) # Prevents stealing focus
         
         self.browser = QWebEngineView()
         self.browser.page().setBackgroundColor(QColor(0, 0, 0, 0))

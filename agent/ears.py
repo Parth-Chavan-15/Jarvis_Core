@@ -137,7 +137,7 @@ def record_and_transcribe() -> str:
             segments, _ = whisper_model.transcribe(
                 audio_filename, 
                 beam_size=5,
-                initial_prompt="Yes. No. Confirm. Cancel. Desktop. Documents. Downloads. Parth Chavan."
+                initial_prompt="Yes. No. Confirm. Cancel. Shut down. Desktop. Documents. Downloads. Parth Chavan."
             )
             transcription = " ".join([segment.text for segment in segments]).strip()
             
