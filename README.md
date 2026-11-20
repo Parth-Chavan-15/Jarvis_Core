@@ -1,17 +1,20 @@
-# ⚡ JARVIS CORE | Autonomous Desktop AI Assistant
-
 <div align="center">
 
-```
+<h1 align="center">⚡ JARVIS CORE</h1>
+<p align="center"><b>Autonomous Desktop AI Assistant</b></p>
+
+<pre align="center">
      ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗     ██████╗ ██████╗ ██████╗ ███████╗
      ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
      ██║███████║██████╔╝██║   ██║██║███████╗    ██║     ██║   ██║██████╔╝█████╗  
 ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║    ██║     ██║   ██║██╔══██╗██╔══╝  
 ╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║    ╚██████╗╚██████╔╝██║  ██║███████╗
  ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
-```
+</pre>
 
-### *Autonomous • 100% Local • Multimodal • Voice & 3D Gesture Driven • Windows OS*
+<p align="center">
+  <em>Autonomous • 100% Local • Multimodal • Voice & 3D Gesture Driven • Windows OS</em>
+</p>
 
 [![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.135-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
