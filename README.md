@@ -30,12 +30,12 @@
 
 [⚡ Quick Start](#-quick-start-run-in-4-steps) • 
 [✨ Features](#-key-features) • 
-[🖐️ 3D Gestures](#-3d-hand-gestures-cheat-sheet) • 
+[🖐️ 3D Gestures](#-3d-hand-gestures) • 
 [🗣️ Voice Commands](#-voice-commands-cheat-sheet) • 
-[🔮 Holographic HUD](#-holographic-hud-state-guide) • 
-[📊 Architecture & Flowcharts](#-system-architecture--expandable-flowcharts) • 
-[⚙️ Full Setup](#-detailed-installation-guide) • 
-[🧪 Diagnostics](#-hardware-diagnostics)
+[🔮 Holographic HUD](#-holographic-desktop-hud) • 
+[📊 Architecture & Flowcharts](#-system-architecture--flowcharts) • 
+[⚙️ Setup Guide](#-step-by-step-setup-guide) • 
+[🛠️ FAQ](#-troubleshooting--faq)
 
 ---
 
@@ -49,7 +49,7 @@
 * **🧠 Thinks** using local **Meta Llama 3** for conversations, intent extraction, and safety confirmations.
 * **👁️ Sees** through your webcam using **LLaVA** to analyze what you hold or point to.
 * **🖐️ Tracks 3D Gestures** with **MediaPipe Hands** to launch apps via contactless hand signs.
-* **🗣️ Speaks** with a thread-safe Windows COM voice pipeline that can be interrupted mid-sentence.
+* **🗣️ Speaks** with a thread-safe Windows voice pipeline that can be interrupted mid-sentence.
 * **🔮 Holographic HUD** floats a futuristic, click-through 3D animated orb over your screen.
 
 ---
@@ -57,7 +57,7 @@
 ## ⚡ Quick Start (Run in 4 Steps)
 
 > [!IMPORTANT]
-> **Prerequisites:** Windows 10/11 and **Python 3.10** installed. (Python 3.10 ensures `PyAudio` installs effortlessly without requiring C++ build tools).
+> **Prerequisites:** Windows 10/11 and **Python 3.10** installed. (Python 3.10 ensures audio drivers install cleanly without requiring Visual Studio C++ build tools).
 
 ### 1. Download & Start Ollama
 Install Ollama from [ollama.com](https://ollama.com/), open your terminal, and pull the two models:
@@ -84,7 +84,7 @@ pip install -r requirements.txt
 python main.py
 ```
 * **The Holographic HUD Orb** will glide to the center of your monitor, greet you verbally, and settle into the bottom-right corner.
-* **Open your browser** to `http://127.0.0.1:8000` to open the Command Center and activate your webcam!
+* **Open your browser** to `http://127.0.0.1:8000` to access the Command Center and activate your webcam!
 
 ---
 
@@ -92,27 +92,27 @@ python main.py
 
 | Capability | What It Does | Technology Under the Hood |
 | :--- | :--- | :--- |
-| **Instant Wake Word** | Responds instantly to *"Hey Jarvis"* with a synthetic acoustic double-chime (C5 + E5). | OpenWakeWord ONNX (`hey_jarvis_v0.1.onnx`) |
-| **Neural Speech-to-Text** | Blazing-fast GPU-accelerated voice transcription with command-biased beam search. | Faster-Whisper (`medium.en` with CUDA INT8) |
-| **Fast-Track App Launch** | Opens apps like VS Code, Chrome, Word, and Edge in under 15ms by bypassing the LLM. | Native Windows Subprocess + Aliases |
-| **Safe OS Automation** | Creates folders, renames files, and requires verbal confirmation before deleting anything. | Llama 3 JSON Intent Extraction + Confirmation State Machine |
-| **3D Contactless Gestures** | Open palm, peace sign, or thumbs up to launch Notepad, Chrome, or Spotify. | MediaPipe Hands 3D Euclidean Vectors |
+| **Instant Wake Word** | Responds instantly to *"Hey Jarvis"* with an acoustic dual-tone chime. | OpenWakeWord Neural ONNX Model |
+| **Neural Speech-to-Text** | Blazing-fast GPU-accelerated voice transcription with command-biased search. | Faster-Whisper (CUDA INT8 Acceleration) |
+| **Fast-Track App Launch** | Opens apps like VS Code, Chrome, Word, and Edge in under 15ms. | Native Windows Subprocess & Aliases |
+| **Safe OS Automation** | Creates folders, renames files, and asks for confirmation before deleting anything. | Llama 3 JSON Extraction + Confirmation Logic |
+| **3D Contactless Gestures** | Open palm, peace sign, or thumbs up to launch Notepad, Chrome, or Spotify. | MediaPipe Hands 3D Spatial Vector Analysis |
 | **Vision Analysis** | *"What am I holding?"* snaps a frame and describes real-world objects. | Local LLaVA Multimodal Vision Model |
-| **Thread-Safe TTS** | Clear voice synthesis that stops the instant you press STOP or say *"Hey Jarvis"*. | pyttsx3 on dedicated `pythoncom` worker thread |
-| **Self-Healing Watchdog** | Background monitor checks Ollama every 3s and notifies you if the neural brain drops or recovers. | Multi-threaded heartbeat watchdog |
-| **Floating HUD Orb** | Transparent, click-through, 3D gyroscopic rotating orb reflecting live system state. | PyQt6 + QWebEngineView + Hardware-Accelerated CSS |
+| **Thread-Safe TTS** | Clear voice synthesis that stops the instant you press STOP or speak. | pyttsx3 with Dedicated Windows Audio Thread |
+| **Self-Healing Watchdog** | Background monitor checks Ollama every 3s and notifies you if the brain reconnects. | Multi-Threaded Heartbeat Monitor |
+| **Floating HUD Orb** | Transparent, click-through, 3D gyroscopic rotating orb reflecting live system state. | PyQt6 + Hardware-Accelerated 3D CSS |
 
 ---
 
-## 🖐️ 3D Hand Gestures Cheat Sheet
+## 🖐️ 3D Hand Gestures
 
-Show your hand to the Command Center camera (`http://127.0.0.1:8000`). Jarvis computes 3D Euclidean distances ($\sqrt{\Delta x^2 + \Delta y^2 + \Delta z^2}$) across 21 hand joints to detect gestures with high precision:
+Show your hand to the Command Center camera (`http://127.0.0.1:8000`). Jarvis tracks 21 distinct joints in full 3D coordinate space, ensuring gestures trigger reliably regardless of hand angle:
 
 | Gesture | Sign | What You Do | Executed Action | Cooldown |
 | :---: | :---: | :--- | :--- | :---: |
-| **Open Palm** | 🖐️ | Extend all 5 fingers facing the camera | **Opens Notepad** (`open notepad`) | 5 sec |
-| **Peace Sign** | ✌️ | Extend Index + Middle fingers (tuck Thumb, Ring, Pinky) | **Opens Google Chrome** (`open chrome`) | 5 sec |
-| **Thumbs Up** | 👍 | Clench all 4 fingers into a fist with Thumb pointed out | **Opens Spotify** (`open spotify`) | 5 sec |
+| **Open Palm** | 🖐️ | Extend all 5 fingers facing the camera | **Opens Notepad** | 5 sec |
+| **Peace Sign** | ✌️ | Extend Index + Middle fingers (tuck Thumb, Ring, Pinky) | **Opens Google Chrome** | 5 sec |
+| **Thumbs Up** | 👍 | Clench fingers into a fist with Thumb pointed outward | **Opens Spotify** | 5 sec |
 
 ---
 
@@ -147,23 +147,23 @@ Say **"Hey Jarvis"**, wait for the double-chime, and speak naturally:
 
 ---
 
-## 🔮 Holographic HUD State Guide
+## 🔮 Holographic Desktop HUD
 
-The transparent holographic orb (`overlay.py`) floats in the corner of your screen, rotating with 3D gyroscopic rings. Its colors tell you exactly what Jarvis is doing:
+The transparent holographic orb (`overlay.py`) floats above all open windows, rotating with 3D gyroscopic rings. Its colors reflect the live state of your AI assistant:
 
-| State | Orb Color | Meaning |
+| Visual Glow | System State | Description |
 | :---: | :---: | :--- |
-| **🟣 Booting** | `#a800ff` Neon Purple | System is starting up; orb expands to center screen and greets you. |
-| **🩵 Idle** | `#00f3ff` Calm Cyan | Standing by, silently listening for *"Hey Jarvis"*. |
-| **🩷 Listening** | `#ff0055` Siri Hot Pink | Microphone active; pulsing while recording your command. |
-| **🟡 Processing** | `#ffbb33` Amber Yellow | Rapidly spinning while Faster-Whisper or Llama 3 processes your request. |
-| **🟢 Speaking** | `#00C851` Matrix Green | Voice engine is speaking your answer. |
-| **🔵 Ollama Error** | `#2f6bff` Cobalt Blue | Ollama is offline. Basic utilities (time, app launching) still work. |
-| **🔴 Offline** | `#ff3333` Red | Jarvis server (`main.py`) is stopped. |
+| 🟣 **Neon Purple** | **Booting** | Startup sequence; the orb glides to the center of your screen and delivers a time-aware vocal greeting. |
+| 🩵 **Calm Cyan** | **Standby (Idle)** | Standing by; silently monitoring the microphone array for *"Hey Jarvis"*. |
+| 🩷 **Siri Pink** | **Listening** | Microphone is active and pulsating while capturing your voice command. |
+| 🟡 **Thinking Amber** | **Processing** | Gyroscopic rings spin rapidly while Whisper transcribes and Llama 3 processes your request. |
+| 🟢 **Matrix Green** | **Speaking** | Voice synthesis is active; delivering clear spoken responses. |
+| 🔵 **Cobalt Blue** | **Neural Engine Offline** | Ollama is unreachable. Offline utilities (time, date, app launching) remain available. |
+| 🔴 **Danger Red** | **Offline** | The Jarvis Core backend service is not running. |
 
 ---
 
-## 📊 System Architecture & Expandable Flowcharts
+## 📊 System Architecture & Flowcharts
 
 Jarvis Core is designed as an asynchronous, decoupled system. Click any flowchart below to explore the internal logic:
 
@@ -175,45 +175,52 @@ Jarvis Core is designed as an asynchronous, decoupled system. Click any flowchar
 
 ```mermaid
 flowchart TD
+    classDef cyan fill:#0f172a,stroke:#00f3ff,stroke-width:2px,color:#f8fafc;
+    classDef purple fill:#2e1065,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef green fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef amber fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef pink fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6;
+    classDef blue fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#eff6ff;
+
     subgraph Hardware ["🖥️ Hardware & OS"]
-        MIC["🎙️ Microphone"]
-        CAM["📷 Webcam"]
-        SPK["🔊 Speakers"]
-        GPU["⚡ NVIDIA CUDA"]
-        OS["🪟 Windows OS"]
+        MIC["🎙️ Microphone Array"]:::cyan
+        CAM["📷 WebRTC Webcam"]:::cyan
+        SPK["🔊 Stereo Speakers"]:::cyan
+        GPU["⚡ NVIDIA CUDA GPU"]:::green
+        OS["🪟 Windows OS Shell"]:::blue
     end
 
     subgraph AudioEngine ["👂 Sensory & Audio Pipeline"]
-        OWW["OpenWakeWord ONNX\n('hey_jarvis_v0.1.onnx')"]
-        CHIME["Dual-Tone Chime Synthesizer\n(C5 523Hz + E5 659Hz)"]
-        FW["Faster-Whisper CUDA INT8\n'medium.en' Model"]
-        TTS["Voice Worker (pyttsx3)\nDedicated Windows COM Thread"]
-        AQUEUE["Thread-Safe Audio Queue"]
+        OWW["👂 OpenWakeWord Engine\n('hey_jarvis_v0.1.onnx')"]:::purple
+        CHIME["🔔 Dual-Tone Chime Synthesizer\n(C5 523Hz + E5 659Hz)"]:::cyan
+        FW["🎙️ Faster-Whisper Speech-to-Text\n(CUDA INT8 Model)"]:::purple
+        TTS["🗣️ Voice Worker Engine\n(Dedicated Windows Audio Thread)"]:::green
+        AQUEUE["📥 Thread-Safe Audio Queue"]:::amber
     end
 
     subgraph Backend ["⚡ Jarvis Core Backend (FastAPI)"]
-        MAIN["main.py Event Loop"]
-        STATE["agent/state.py Global State"]
-        WATCH["Ollama Heartbeat Monitor"]
-        INTENT["agent/intent.py 5-Tier Router"]
-        TOOLS["agent/tools.py Automation Tools"]
+        MAIN["⚙️ main.py Event Loop"]:::cyan
+        STATE["📊 Global Thread State Machine"]:::blue
+        WATCH["💓 Ollama Heartbeat Monitor"]:::amber
+        INTENT["🔀 5-Tier Intent Router"]:::purple
+        TOOLS["🛠️ Windows Automation Tools"]:::green
     end
 
     subgraph AI_Engines ["🧠 Local Neural Engines (Ollama)"]
-        LLM["Llama 3 (Conversational & JSON Intent)"]
-        VISION["LLaVA (Multimodal Vision Cortex)"]
+        LLM["🧠 Llama 3 Neural Brain\n(Conversational & JSON Intent)"]:::purple
+        VISION["👁️ LLaVA Vision Cortex\n(Scene & Object Understanding)"]:::pink
     end
 
     subgraph Interfaces ["🖥️ User Interfaces"]
-        HUD["PyQt6 Holographic Orb (overlay.py)"]
-        UI["Web Command Center (ui/index.html)"]
-        TRAY["Windows System Tray (pystray)"]
+        HUD["🔮 Holographic Orb HUD\n(PyQt6 Hardware-Accelerated)"]:::cyan
+        UI["💻 Web Command Center\n(MediaPipe 3D Hand Tracking)"]:::blue
+        TRAY["📌 Windows System Tray Daemon"]:::green
     end
 
-    MIC -->|16kHz Audio Stream| OWW
+    MIC -->|16kHz PCM Stream| OWW
     OWW -->|Wake Detected > 0.75| CHIME
     CHIME -->|Auditory Feedback| SPK
-    OWW -->|Trigger Command Recording| FW
+    OWW -->|Trigger Audio Recording| FW
     GPU -->|Accelerate Inference| FW
     FW -->|Transcribed Text| INTENT
 
@@ -225,7 +232,7 @@ flowchart TD
     INTENT -->|Intent JSON / Chat| LLM
     TOOLS -->|OS Automation| OS
 
-    MAIN -->|Dispatch Speech| AQUEUE
+    MAIN -->|Dispatch Speech Task| AQUEUE
     AQUEUE --> TTS
     TTS -->|Voice Output| SPK
 
@@ -245,28 +252,35 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    START([Standby Loop]) --> CHECK_IDLE{State in\nidle / error?}
-    CHECK_IDLE -- No --> WAIT[Sleep 500ms] --> CHECK_IDLE
-    CHECK_IDLE -- Yes --> OPEN_MIC[Open PyAudio Stream\n16000Hz, 16-bit Mono]
-    OPEN_MIC --> FLUSH[Flush Buffer: 15 Chunks]
-    FLUSH --> LISTEN[Stream to OpenWakeWord]
+    classDef cyan fill:#0f172a,stroke:#00f3ff,stroke-width:2px,color:#f8fafc;
+    classDef purple fill:#2e1065,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef green fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef amber fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef pink fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6;
+    classDef blue fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#eff6ff;
+
+    START(["🟢 System Standby Loop"]):::cyan --> CHECK_IDLE{"Is System\nStandby Ready?"}:::blue
+    CHECK_IDLE -- No --> WAIT["⏳ Wait 500ms"]:::amber --> CHECK_IDLE
+    CHECK_IDLE -- Yes --> OPEN_MIC["🎙️ Open PyAudio Stream\n(16000Hz, 16-bit Mono)"]:::cyan
+    OPEN_MIC --> FLUSH["🧹 Flush Audio Buffer"]:::blue
+    FLUSH --> LISTEN["👂 Stream to OpenWakeWord"]:::purple
     
-    LISTEN --> SCORE{hey_jarvis_v0.1\nScore > 0.75?}
-    SCORE -- No --> CHECK_INT{Interrupted?}
-    CHECK_INT -- Yes --> CLOSE[Close Stream] --> START
+    LISTEN --> SCORE{"Acoustic Match\nScore > 0.75?"}:::amber
+    SCORE -- No --> CHECK_INT{"Interrupted?"}:::blue
+    CHECK_INT -- Yes --> CLOSE["🛑 Close Audio Stream"]:::pink --> START
     CHECK_INT -- No --> LISTEN
 
-    SCORE -- Yes --> KILL_SPEECH[Clear Audio Queue\nSet stop_voice = True]
-    KILL_SPEECH --> PLAY_CHIME[Play C5 + E5 Chime via PyAudio]
-    PLAY_CHIME --> RECORD[Record Command with Dynamic Noise Gate]
+    SCORE -- Yes --> KILL_SPEECH["⚡ Truncate Active Speech\n& Clear Audio Queue"]:::pink
+    KILL_SPEECH --> PLAY_CHIME["🔔 Play C5 + E5 Dual Chime"]:::cyan
+    PLAY_CHIME --> RECORD["🎙️ Record User Command\n(Dynamic Noise Calibration)"]:::purple
     
-    RECORD --> TIMEOUT{Silence Timeout?}
-    TIMEOUT -- Yes --> RESET[Announce Standby] --> START
-    TIMEOUT -- No --> KILL_REC{Did User Hit STOP?}
-    KILL_REC -- Yes --> DISCARD[Discard Audio] --> START
+    RECORD --> TIMEOUT{"Silence\nTimeout?"}:::blue
+    TIMEOUT -- Yes --> RESET["↩️ Announce Standby"]:::amber --> START
+    TIMEOUT -- No --> KILL_REC{"Did User Hit\nSTOP Button?"}:::pink
+    KILL_REC -- Yes --> DISCARD["🗑️ Discard Audio Buffer"]:::pink --> START
     
-    KILL_REC -- No --> WHISPER[Transcribe via Faster-Whisper CUDA\nBiased Beam Search]
-    WHISPER --> DISPATCH([Pass Text to Intent Router])
+    KILL_REC -- No --> WHISPER["⚡ Transcribe via Faster-Whisper\n(CUDA INT8 Beam Search)"]:::green
+    WHISPER --> DISPATCH(["➡️ Pass Text to Intent Router"]):::cyan
 ```
 
 </details>
@@ -279,28 +293,35 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    CMD([User Utterance]) --> PENDING{Is There a\nPending Action?}
+    classDef cyan fill:#0f172a,stroke:#00f3ff,stroke-width:2px,color:#f8fafc;
+    classDef purple fill:#2e1065,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef green fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef amber fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef pink fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6;
+    classDef blue fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#eff6ff;
+
+    CMD(["💬 User Utterance Received"]):::cyan --> PENDING{"Is There a\nPending Action?"}:::amber
     
-    PENDING -- Yes --> CONFIRM[Send to handle_confirmation\nPrompt Llama 3 JSON]
-    CONFIRM --> DECISION{Decision}
-    DECISION -- confirmed --> EXECUTE[Execute File/Folder Action] --> SPEAK([Speak Confirmation])
-    DECISION -- modified --> UPDATE[Update Parameters] --> SPEAK
-    DECISION -- cancelled --> ABORT[Abort Task Cleanly] --> SPEAK
+    PENDING -- Yes --> CONFIRM["🔍 Analyze User Confirmation\n(Llama 3 JSON Evaluation)"]:::purple
+    CONFIRM --> DECISION{"Status Result"}:::blue
+    DECISION -- Confirmed --> EXECUTE["⚡ Execute Requested Action\n(Create / Delete / Rename)"]:::green --> SPEAK(["🗣️ Deliver Spoken Feedback"]):::cyan
+    DECISION -- Modified --> UPDATE["✏️ Update Action Parameters"]:::amber --> SPEAK
+    DECISION -- Cancelled --> ABORT["🛑 Abort Task Safely"]:::pink --> SPEAK
 
-    PENDING -- No --> T1{Tier 1: Optic / Vision Trigger?\n'look at this', 'what is this'}
-    T1 -- Yes --> VISION_FLAG[Signal UI to Snap Camera Frame] --> SPEAK
+    PENDING -- No --> T1{"Tier 1: Optic Trigger?\n'look at this', 'what is this'"}:::pink
+    T1 -- Yes --> VISION_FLAG["📷 Request WebRTC Camera Snapshot"]:::pink --> SPEAK
 
-    T1 -- No --> T2{Tier 2: Fast-Track App Launch?\n'open ...' or 'launch ...'}
-    T2 -- Yes --> LAUNCH[Map Alias & Run Windows Subprocess] --> SPEAK
+    T1 -- No --> T2{"Tier 2: Fast-Track App Launch?\n'open ...' or 'launch ...'"}:::green
+    T2 -- Yes --> LAUNCH["🚀 Resolve Alias & Launch Subprocess\n(Sub-15ms Execution)"]:::green --> SPEAK
 
-    T2 -- No --> T3{Tier 3: Offline System Utilities?\nTime / Date / Timer}
-    T3 -- Yes --> UTILS[Fetch Clock / Date / Spawn Timer Thread] --> SPEAK
+    T2 -- No --> T3{"Tier 3: Offline System Utilities?\nTime / Date / Background Timer"}:::blue
+    T3 -- Yes --> UTILS["⏰ Fetch Clock / Date / Spawn Timer"]:::blue --> SPEAK
 
-    T3 -- No --> T4[Tier 4: Llama 3 JSON Intent Extraction]
-    T4 --> INTENT_TYPE{Extracted Intent}
-    INTENT_TYPE -- create_folder / rename --> STAGE[Stage Action & Request Confirmation] --> SPEAK
-    INTENT_TYPE -- delete_item --> WARN[Issue High-Priority Delete Warning] --> SPEAK
-    INTENT_TYPE -- none / conversational --> T5[Tier 5: Llama 3 Conversational Brain] --> SPEAK
+    T3 -- No --> T4["🧠 Tier 4: Llama 3 JSON Intent Extraction"]:::purple
+    T4 --> INTENT_TYPE{"Identified Intent"}:::blue
+    INTENT_TYPE -- Create / Rename --> STAGE["📋 Stage Action & Request Confirmation"]:::amber --> SPEAK
+    INTENT_TYPE -- Delete File/Folder --> WARN["⚠️ Issue High-Priority Delete Warning"]:::pink --> SPEAK
+    INTENT_TYPE -- General Conversational --> T5["💡 Tier 5: Llama 3 Conversational Reasoning"]:::purple --> SPEAK
 ```
 
 </details>
@@ -313,24 +334,31 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    CAM([Webcam]) --> FRAME[Capture 640x480 Video Frame]
-    FRAME --> MP[MediaPipe Hands ML Pipeline]
-    MP --> 3D_POINTS[Extract 21 Landmarks in 3D: x, y, z]
+    classDef cyan fill:#0f172a,stroke:#00f3ff,stroke-width:2px,color:#f8fafc;
+    classDef purple fill:#2e1065,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef green fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef amber fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef pink fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6;
+    classDef blue fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#eff6ff;
+
+    CAM(["📷 WebRTC Webcam"]):::cyan --> FRAME["🎞️ Capture 640x480 Video Frame"]:::blue
+    FRAME --> MP["🤖 MediaPipe Hands ML Model"]:::purple
+    MP --> POINTS["📍 Extract 21 Landmarks in 3D Space"]:::cyan
     
-    3D_POINTS --> MATH["Compute 3D Euclidean Distances:\nDistance = √(Δx² + Δy² + Δz²)"]
-    MATH --> FINGERS[Evaluate Extension of Each Finger]
+    POINTS --> MATH["📐 Calculate 3D Euclidean Distances\nBetween Joints & Bases"]:::blue
+    MATH --> FINGERS["🖐️ Evaluate Finger Extension States"]:::purple
 
-    FINGERS --> LOGIC{Strict Gesture Logic}
-    LOGIC -- "All 5 Fingers Extended" --> PALM["🖐️ Open Palm\nCommand: 'open notepad'"]
-    LOGIC -- "Index + Middle Up,\nOthers Tucked" --> PEACE["✌️ Peace Sign\nCommand: 'open chrome'"]
-    LOGIC -- "Only Thumb Out,\nFingers Tucked" --> THUMB["👍 Thumbs Up\nCommand: 'open spotify'"]
+    FINGERS --> LOGIC{"Strict Geometric\nGesture Classifier"}:::amber
+    LOGIC -- All 5 Fingers Extended --> PALM["🖐️ Open Palm Detected\nCommand: 'open notepad'"]:::green
+    LOGIC -- Index + Middle Extended --> PEACE["✌️ Peace Sign Detected\nCommand: 'open chrome'"]:::cyan
+    LOGIC -- Thumb Out, Others Tucked --> THUMB["👍 Thumbs Up Detected\nCommand: 'open spotify'"]:::purple
 
-    PALM --> COOLDOWN{Last Trigger > 5s?}
+    PALM --> COOLDOWN{"5-Second\nCooldown Check"}:::blue
     PEACE --> COOLDOWN
     THUMB --> COOLDOWN
 
-    COOLDOWN -- Yes --> API[Send POST to /api/chat]
-    COOLDOWN -- No --> SUPPRESS[Ignore Bounce]
+    COOLDOWN -- Ready --> API["⚡ Forward Command to Backend"]:::green
+    COOLDOWN -- Cooling Down --> SUPPRESS["🛡️ Suppress Duplicate Trigger"]:::pink
 ```
 
 </details>
@@ -338,31 +366,38 @@ flowchart LR
 <br>
 
 <details>
-<summary><b>🗣️ [FLOWCHART 5] Immortal Audio Pipeline & Word-Level Interruption (Click to Expand)</b></summary>
+<summary><b>🗣️ [FLOWCHART 5] Immortal Audio Pipeline & Real-Time Interruption (Click to Expand)</b></summary>
 <br>
 
 ```mermaid
 flowchart TD
-    INIT([App Boot]) --> COM_THREAD[Spawn Background Daemon Thread\nCall pythoncom.CoInitialize]
-    COM_THREAD --> QUEUE_WAIT[Wait for Text in audio_queue]
+    classDef cyan fill:#0f172a,stroke:#00f3ff,stroke-width:2px,color:#f8fafc;
+    classDef purple fill:#2e1065,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef green fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef amber fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef pink fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6;
+    classDef blue fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#eff6ff;
 
-    DISPATCH_CALL([speak_text Called]) --> PUT_QUEUE[audio_queue.put text]
+    INIT(["🚀 Application Boot"]):::cyan --> COM_THREAD["🧵 Spawn Background Voice Daemon\n(Initialize Windows Audio COM)"]:::blue
+    COM_THREAD --> QUEUE_WAIT["📥 Wait for Spoken Text in Audio Queue"]:::amber
+
+    DISPATCH_CALL(["🗣️ speak_text Invoked"]):::cyan --> PUT_QUEUE["➕ Push Text to FIFO Queue"]:::cyan
     PUT_QUEUE --> QUEUE_WAIT
 
-    QUEUE_WAIT --> DEQUEUE[Get Message & Set state = 'speaking']
-    DEQUEUE --> FRESH_ENGINE[Initialize Fresh pyttsx3.init Engine\n(Prevents Windows Driver Memory Leaks)]
-    FRESH_ENGINE --> HOOK[Attach 'started-word' Callback]
-    HOOK --> RUN[engine.say & engine.runAndWait]
+    QUEUE_WAIT --> DEQUEUE["📤 Dequeue Spoken Sentence\n(Set State = Speaking)"]:::purple
+    DEQUEUE --> FRESH_ENGINE["🔄 Initialize Fresh Voice Engine\n(Prevents Audio Driver Memory Leaks)"]:::green
+    FRESH_ENGINE --> HOOK["🔗 Connect Real-Time Word Hook"]:::blue
+    HOOK --> RUN["🔊 Synthesize Audio Playback"]:::green
 
     subgraph WordCallback ["Real-Time Word Boundary Hook"]
-        WORD[On Every Word Boundary] --> CHECK_KILL{Is stop_voice\n== True?}
-        CHECK_KILL -- Yes --> ENGINE_STOP[engine.stop Immediately Truncates Audio]
-        CHECK_KILL -- No --> NEXT_WORD[Continue Speaking]
+        WORD["🔤 At Every Word Boundary"]:::purple --> CHECK_KILL{"Did User Hit STOP\nor Wake Word?"}:::pink
+        CHECK_KILL -- Yes --> ENGINE_STOP["🛑 Stop Engine Immediately\n& Truncate Audio"]:::pink
+        CHECK_KILL -- No --> NEXT_WORD["▶️ Continue Speaking"]:::green
     end
 
     HOOK -.-> WORD
-    RUN --> CLEANUP[Call 'del engine' to Free Handles]
-    CLEANUP --> STATE_RESET[Restore state = idle / ollama_error]
+    RUN --> CLEANUP["🧹 Safely Delete Engine Handles"]:::blue
+    CLEANUP --> STATE_RESET["🔄 Restore Standby State"]:::green
     STATE_RESET --> QUEUE_WAIT
 ```
 
@@ -375,69 +410,45 @@ flowchart TD
 <br>
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Offline: PyQt6 HUD Starts
-    Offline --> Booting: FastAPI Backend Connects
+flowchart TD
+    classDef purple fill:#2e1065,stroke:#a855f7,stroke-width:2px,color:#f3e8ff;
+    classDef cyan fill:#0f172a,stroke:#00f3ff,stroke-width:2px,color:#f8fafc;
+    classDef pink fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6;
+    classDef amber fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+    classDef green fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
+    classDef blue fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#eff6ff;
+    classDef red fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fee2e2;
+
+    BOOT["🟣 Booting Sequence\n(Neon Purple • Center Screen 2.5x Scale)"]:::purple --> CHECK_BRAIN{"Is Local Ollama\nOnline?"}:::blue
     
-    state Booting {
-        [*] --> PurpleOrb: Neon Purple (#a800ff)
-        PurpleOrb --> CenterDisplay: Glides to Center Screen (2.5x Scale)
-        CenterDisplay --> SpokenGreeting: "Good morning/afternoon/evening, sir."
-    }
+    CHECK_BRAIN -- Online --> IDLE["🩵 Standby / Idle\n(Calm Cyan • Bottom-Right Corner)"]:::cyan
+    CHECK_BRAIN -- Offline --> ERR["🔵 Neural Engine Offline\n(Cobalt Blue • Basic OS Mode)"]:::blue
 
-    Booting --> Idle: Ollama Connected
-    Booting --> OllamaError: Ollama Offline
-    
-    state Idle {
-        [*] --> CyanOrb: Calm Cyan (#00f3ff) at Bottom-Right
-        CyanOrb --> Watchdog: Listening for 'Hey Jarvis'
-    }
+    IDLE -->|Wake Word Detected| LISTEN["🩷 Listening\n(Siri Pink • Pulsing Audio Ring)"]:::pink
+    ERR -->|Wake Word Detected| LISTEN
 
-    state OllamaError {
-        [*] --> CobaltOrb: Cobalt Blue (#2f6bff)
-        CobaltOrb --> BasicMode: Offline System Commands Only
-    }
+    LISTEN -->|Command Finished| PROC["🟡 Processing\n(Thinking Amber • Fast Gyroscopic Spin)"]:::amber
+    LISTEN -->|User Hits STOP| IDLE
 
-    Idle --> Listening: Wake Word Detected
-    OllamaError --> Listening: Wake Word Detected
+    PROC -->|Response Generated| SPEAK["🟢 Speaking\n(Matrix Green • Gentle Breathing Glow)"]:::green
+    PROC -->|User Interrupted| IDLE
 
-    state Listening {
-        [*] --> PinkOrb: Siri Hot Pink (#ff0055)
-        PinkOrb --> FastPulse: 1.5s Dynamic Pulsing
-    }
+    SPEAK -->|Finished Speaking| IDLE
+    SPEAK -->|Interrupted Mid-Speech| LISTEN
 
-    Listening --> Processing: Command Finished
-    Listening --> Idle: User Hits STOP Button
-
-    state Processing {
-        [*] --> AmberOrb: Thinking Amber (#ffbb33)
-        AmberOrb --> HighSpeedSpin: 0.8s Rapid Gyro Ring Spin
-    }
-
-    Processing --> Speaking: Response Ready
-    Processing --> Idle: User Interrupted
-
-    state Speaking {
-        [*] --> GreenOrb: Matrix Green (#00C851)
-        GreenOrb --> GentleBreathing: 2.5s Calm Glow Pulse
-    }
-
-    Speaking --> Idle: Finished Speaking
-    Speaking --> Listening: User Says 'Hey Jarvis' Mid-Speech
-
-    Idle --> Offline: Shutdown Sequence
-    OllamaError --> Offline: Shutdown Sequence
+    IDLE -->|Shutdown Initiated| OFF["🔴 Offline\n(Danger Red • Server Stopped)"]:::red
+    ERR -->|Shutdown Initiated| OFF
 ```
 
 </details>
 
 ---
 
-## ⚙️ Detailed Installation Guide
+## ⚙️ Step-by-Step Setup Guide
 
 ### System Requirements
 * **OS:** Windows 10 or 11 (64-bit).
-* **Python:** **Python 3.10** *(Crucial: PyAudio C-bindings are pre-compiled for 3.10).*
+* **Python:** **Python 3.10** *(Crucial: PyAudio C-bindings install cleanly on Python 3.10).*
 * **GPU:** NVIDIA GPU with CUDA drivers recommended (runs on CPU fallback if needed).
 * **Peripherals:** Microphone, webcam, and speakers/headphones.
 
@@ -491,15 +502,17 @@ pip install -r requirements.txt
 
 ---
 
-### Step 4: Run Hardware Diagnostics
-Before launching, verify your microphone and acoustic model:
+### Step 4: Quick Audio & Wake-Word Verification
+Jarvis includes two quick diagnostic scripts to verify your microphone and speech models before launching the full app:
 
 ```powershell
-# Diagnostic 1: Tests your microphone hardware & checks background noise
+# Test 1: Verify your microphone hardware & check ambient noise calibration
 python test_mic.py
+# Scans all audio input devices, measures room noise for 2 seconds, and confirms clean waveform capture.
 
-# Diagnostic 2: Verifies 'Hey Jarvis' wake word & Faster-Whisper transcription
+# Test 2: Verify "Hey Jarvis" wake-word detection & Whisper transcription
 python test_ears.py
+# Runs the wake-word engine locally. Say "Hey Jarvis", listen for the double-chime, and speak a test command.
 ```
 
 ---
@@ -509,41 +522,6 @@ python test_ears.py
 python main.py
 ```
 Open **`http://127.0.0.1:8000`** in your browser to access the live Command Center!
-
----
-
-## 🧪 Hardware Diagnostics
-
-Jarvis Core includes two built-in diagnostics to isolate audio and model issues:
-
-### 1. `test_mic.py` (Hardware Diagnostic)
-Scans connected audio devices, calibrates ambient noise for 2 seconds, captures 5 seconds of audio, and reports the exact byte count captured to confirm your mic is operating properly.
-
-```powershell
-python test_mic.py
-```
-
-### 2. `test_ears.py` (Wake-Word Diagnostic)
-Tests the acoustic model (`hey_jarvis_v0.1.onnx`) without launching the FastAPI server. Say *"Hey Jarvis"*, listen for the chime, speak a test command, and verify Faster-Whisper's transcription accuracy in your console.
-
-```powershell
-python test_ears.py
-```
-
----
-
-## 📡 REST API Documentation
-
-The FastAPI server runs locally on `http://127.0.0.1:8000`:
-
-| Endpoint | Method | Purpose | Sample Request Body |
-| :--- | :---: | :--- | :--- |
-| **`/api/chat`** | `POST` | Process a text command sequence. | `{"message": "Open Chrome"}` |
-| **`/api/vision`** | `POST` | Send a camera frame snapshot to LLaVA. | `{"prompt": "What is this?", "image_b64": "data:image/jpeg;base64,..."}` |
-| **`/api/vision_failed`**| `POST` | Notify backend if camera is frozen or minimized. | `{"error": "camera_frozen"}` |
-| **`/api/status`** | `GET` | Polled by Web UI for logs, state, and camera requests. | *(None)* |
-| **`/api/hud`** | `GET` | High-frequency endpoint polled by PyQt6 HUD. | *(None)* |
-| **`/api/stop`** | `POST` | Global emergency kill switch (stops speech & LLM). | *(None)* |
 
 ---
 
@@ -560,7 +538,7 @@ Jarvis_Core/
 │   ├── intent.py                  # 5-Tier Intent routing & safety confirmations
 │   ├── state.py                   # Global thread-safe state machine & interrupt flags
 │   ├── tools.py                   # Windows filesystem automation, timers & app launcher
-│   └── voice.py                   # Immortal Windows COM pyttsx3 audio worker
+│   └── voice.py                   # Dedicated Windows audio worker thread
 │
 ├── models/                        # Pre-Trained Machine Learning Models
 │   └── hey_jarvis_v0.1.onnx       # Custom openWakeWord acoustic wake-word model
@@ -572,8 +550,8 @@ Jarvis_Core/
 ├── main.py                        # Central server, FastAPI endpoints, system tray, & lifecycle
 ├── overlay.py                     # PyQt6 hardware-accelerated holographic HUD orb
 ├── requirements.txt               # Locked production dependencies
-├── test_ears.py                   # Standalone diagnostic for wake-word & Whisper
-├── test_mic.py                    # Standalone diagnostic for audio input hardware
+├── test_ears.py                   # Quick diagnostic for wake-word & Whisper
+├── test_mic.py                    # Quick diagnostic for audio input hardware
 └── README.md                      # Project documentation
 ```
 
@@ -587,7 +565,7 @@ Jarvis_Core/
 
 * Make sure Ollama is running. Open terminal and run `ollama serve`.
 * Verify that you have pulled the model: `ollama pull llama3`.
-* Jarvis continuously monitors port `11434`. The moment Ollama starts, Jarvis turns green and automatically announces: *"Connection to Ollama neural engine re-established."*
+* Jarvis continuously monitors Ollama in the background. The moment Ollama starts, Jarvis turns green and automatically announces: *"Connection to Ollama neural engine re-established."*
 
 </details>
 
@@ -595,7 +573,7 @@ Jarvis_Core/
 <summary><b>Q: Faster-Whisper throws a CUDA or cuDNN error.</b></summary>
 <br>
 
-* If you do not have an NVIDIA GPU, open `agent/ears.py` line 22 and change `device="cuda"` to `device="cpu"`:
+* If you do not have an NVIDIA GPU, set the device to CPU in `agent/ears.py`:
   ```python
   whisper_model = WhisperModel("medium.en", device="cpu", compute_type="int8")
   ```
@@ -607,7 +585,7 @@ Jarvis_Core/
 <br>
 
 * Check that your browser allowed camera permissions on `http://127.0.0.1:8000`.
-* Ensure the Command Center tab is active and visible on your screen. If minimized for > 2 seconds, the camera heartbeat sleeps to save GPU cycles.
+* Ensure the Command Center tab is active and visible on your screen. If minimized for more than 2 seconds, the camera heartbeat sleeps to save GPU cycles.
 * Hold your hand clearly in front of the camera and pause for a moment to allow the 5-second debounce timer to reset.
 
 </details>
@@ -641,8 +619,14 @@ Special thanks to the open-source projects powering Jarvis:
 
 <div align="center">
 
-### ⭐ Star this repository on GitHub if you love local AI! ⭐
+### 🌟 Loved Jarvis Core?
 
-*Built with passion, local neural compute, and clean engineering.*
+If this project inspired you or helped you explore local AI, feel free to give it a **Star**!
+
+[⭐ Star on GitHub](https://github.com/Parth-Chavan-15/Jarvis_Core) • [🐛 Report an Issue](https://github.com/Parth-Chavan-15/Jarvis_Core/issues) • [💡 Suggest a Feature](https://github.com/Parth-Chavan-15/Jarvis_Core/pulls)
+
+<br>
+
+*“Sometimes you gotta run before you can walk.” — Tony Stark*
 
 </div>
