@@ -31,13 +31,13 @@
 
 ---
 
-[⚡ Quick Start](#-quick-start-run-in-4-steps) • 
 [✨ Features](#-key-features) • 
 [🖐️ 3D Gestures](#-3d-hand-gestures) • 
 [🗣️ Voice Commands](#-voice-commands-cheat-sheet) • 
 [🔮 Holographic HUD](#-holographic-desktop-hud) • 
 [📊 Architecture & Flowcharts](#-system-architecture--flowcharts) • 
-[⚙️ Setup Guide](#-step-by-step-setup-guide) • 
+[📂 Project Structure](#-project-directory-structure) • 
+[🚀 Installation & Setup](#-installation--setup-guide) • 
 [🛠️ FAQ](#-troubleshooting--faq)
 
 ---
@@ -54,40 +54,6 @@
 * **🖐️ Tracks 3D Gestures** with **MediaPipe Hands** to launch apps via contactless hand signs.
 * **🗣️ Speaks** with a thread-safe Windows voice pipeline that can be interrupted mid-sentence.
 * **🔮 Holographic HUD** floats a futuristic, click-through 3D animated orb over your screen.
-
----
-
-## ⚡ Quick Start (Run in 4 Steps)
-
-> [!IMPORTANT]
-> **Prerequisites:** Windows 10/11 and **Python 3.10** installed. (Python 3.10 ensures audio drivers install cleanly without requiring Visual Studio C++ build tools).
-
-### 1. Download & Start Ollama
-Install Ollama from [ollama.com](https://ollama.com/), open your terminal, and pull the two models:
-```powershell
-ollama pull llama3
-ollama pull llava
-```
-
-### 2. Clone the Repository
-```powershell
-git clone https://github.com/Parth-Chavan-15/Jarvis_Core.git
-cd Jarvis_Core
-```
-
-### 3. Create a Python 3.10 Virtual Environment & Install Dependencies
-```powershell
-py -3.10 -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 4. Boot Up Jarvis
-```powershell
-python main.py
-```
-* **The Holographic HUD Orb** will glide to the center of your monitor, greet you verbally, and settle into the bottom-right corner.
-* **Open your browser** to `http://127.0.0.1:8000` to access the Command Center and activate your webcam!
 
 ---
 
@@ -447,87 +413,6 @@ flowchart TD
 
 ---
 
-## ⚙️ Step-by-Step Setup Guide
-
-### System Requirements
-* **OS:** Windows 10 or 11 (64-bit).
-* **Python:** **Python 3.10** *(Crucial: PyAudio C-bindings install cleanly on Python 3.10).*
-* **GPU:** NVIDIA GPU with CUDA drivers recommended (runs on CPU fallback if needed).
-* **Peripherals:** Microphone, webcam, and speakers/headphones.
-
----
-
-### Step 1: Install Ollama & Pull Local Models
-1. Download from [ollama.com](https://ollama.com/) and run the installer.
-2. In your terminal, pull the language and vision models:
-   ```powershell
-   ollama pull llama3
-   ollama pull llava
-   ```
-3. Test that Ollama is responding:
-   ```powershell
-   curl http://127.0.0.1:11434/
-   # Returns: "Ollama is running"
-   ```
-
----
-
-### Step 2: Clone the Project
-```powershell
-git clone https://github.com/Parth-Chavan-15/Jarvis_Core.git
-cd Jarvis_Core
-```
-
----
-
-### Step 3: Setup the Python 3.10 Environment
-Make sure you use **Python 3.10**:
-```powershell
-# Create virtual environment
-py -3.10 -m venv venv
-
-# Activate it
-venv\Scripts\activate
-
-# Upgrade pip
-pip install --upgrade pip
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-> [!TIP]
-> If `pip install -r requirements.txt` throws an error on `pyaudio`, simply run:
-> ```powershell
-> pip install pipwin
-> pipwin install pyaudio
-> ```
-
----
-
-### Step 4: Quick Audio & Wake-Word Verification
-Jarvis includes two quick diagnostic scripts to verify your microphone and speech models before launching the full app:
-
-```powershell
-# Test 1: Verify your microphone hardware & check ambient noise calibration
-python test_mic.py
-# Scans all audio input devices, measures room noise for 2 seconds, and confirms clean waveform capture.
-
-# Test 2: Verify "Hey Jarvis" wake-word detection & Whisper transcription
-python test_ears.py
-# Runs the wake-word engine locally. Say "Hey Jarvis", listen for the double-chime, and speak a test command.
-```
-
----
-
-### Step 5: Start Jarvis
-```powershell
-python main.py
-```
-Open **`http://127.0.0.1:8000`** in your browser to access the live Command Center!
-
----
-
 ## 📂 Project Directory Structure
 
 ```
@@ -557,6 +442,96 @@ Jarvis_Core/
 ├── test_mic.py                    # Quick diagnostic for audio input hardware
 └── README.md                      # Project documentation
 ```
+
+---
+
+## 🚀 Installation & Setup Guide
+
+Follow this guide to get Jarvis Core running locally on your PC.
+
+### 📋 Prerequisites & System Requirements
+* **Operating System:** Windows 10 or 11 (64-bit).
+* **Python Version:** **Python 3.10** *(Crucial: `PyAudio` includes pre-compiled binary wheels for Python 3.10 on Windows, which avoids requiring Visual Studio C++ Build Tools).*
+* **Hardware:** Functional microphone, webcam, and speakers or headphones.
+* **GPU (Optional but Recommended):** NVIDIA GPU with CUDA for real-time speech transcription via Faster-Whisper (automatically falls back to CPU if no GPU is detected).
+
+---
+
+### Step 1: Install & Start Ollama (Neural Engine)
+Jarvis relies on local models powered by Ollama: **Llama 3** for conversation and intent extraction, and **LLaVA** for vision analysis.
+
+1. Download and install Ollama from [ollama.com](https://ollama.com/).
+2. Open Windows Terminal (PowerShell or Command Prompt) and pull the models:
+   ```powershell
+   ollama pull llama3
+   ollama pull llava
+   ```
+3. Verify that the Ollama engine is active:
+   ```powershell
+   curl http://127.0.0.1:11434/
+   # Returns: "Ollama is running"
+   ```
+
+---
+
+### Step 2: Clone the Repository
+Clone the project to your local machine and navigate into the project directory:
+```powershell
+git clone https://github.com/Parth-Chavan-15/Jarvis_Core.git
+cd Jarvis_Core
+```
+
+---
+
+### Step 3: Configure Python 3.10 Environment & Dependencies
+Isolate dependencies using a dedicated Python 3.10 virtual environment:
+
+```powershell
+# 1. Create virtual environment using Python 3.10
+py -3.10 -m venv venv
+
+# 2. Activate the virtual environment
+venv\Scripts\activate
+
+# 3. Upgrade pip
+pip install --upgrade pip
+
+# 4. Install project dependencies
+pip install -r requirements.txt
+```
+
+> [!TIP]
+> If `pip install -r requirements.txt` reports an issue installing `pyaudio`, install it cleanly using `pipwin`:
+> ```powershell
+> pip install pipwin
+> pipwin install pyaudio
+> ```
+
+---
+
+### Step 4: Verify Hardware & Models (Recommended Test)
+Before launching the complete system, run the two standalone diagnostics to confirm microphone capture and wake-word accuracy:
+
+```powershell
+# Test 1: Verify your microphone hardware & check ambient noise calibration
+python test_mic.py
+# Scans all audio input devices, measures room noise for 2 seconds, and confirms clean waveform capture.
+
+# Test 2: Verify "Hey Jarvis" wake-word detection & Whisper transcription
+python test_ears.py
+# Runs the wake-word engine locally. Say "Hey Jarvis", listen for the double-chime, and speak a test command.
+```
+
+---
+
+### Step 5: Boot Up Jarvis Core
+Launch the central application:
+```powershell
+python main.py
+```
+
+* **Holographic HUD Orb:** The 3D orb will initialize in neon purple, glide to the center of your screen, deliver a time-aware spoken greeting, and dock in the bottom-right corner in calm cyan.
+* **Command Center:** Open your browser to **`http://127.0.0.1:8000`** to view live telemetry, send text commands, and activate your webcam for 3D hand gestures.
 
 ---
 
